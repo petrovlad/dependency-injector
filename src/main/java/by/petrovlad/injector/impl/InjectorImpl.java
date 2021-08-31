@@ -35,7 +35,7 @@ public class InjectorImpl implements Injector {
 
         return switch (bindings.get(type).getScope()) {
             case PROTOTYPE -> () -> (T) instantiatePrototype(implClass);
-            case SINGLETON -> () -> (T) instantiateSingleton(implClass);
+            case SINGLETON-> () -> (T) instantiateSingleton(implClass);
         };
     }
 
