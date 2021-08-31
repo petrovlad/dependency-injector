@@ -22,8 +22,8 @@ public class BindingsMap {
         this.bindings = bindings;
     }
 
-    public <T> void addBinding(Class<T> intf, Class<? extends T> impl, Scope scope) {
-        bindings.put(intf, new ImplClass<>(impl, scope));
+    public <T> ImplClass<?> addBinding(Class<T> intf, Class<? extends T> impl, Scope scope) {
+        return bindings.put(intf, new ImplClass<>(impl, scope));
     }
 
     public boolean containsKey(Class<?> intf) {
