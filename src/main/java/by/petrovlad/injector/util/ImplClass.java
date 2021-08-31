@@ -6,6 +6,7 @@ import by.petrovlad.injector.exception.TooManyConstructorsException;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ImplClass<T> {
 
@@ -57,6 +58,19 @@ public class ImplClass<T> {
         return Arrays.stream(impl.getConstructors())
                 .filter((constructor1 -> constructor1.isAnnotationPresent(Inject.class)))
                 .toArray(Constructor<?>[]::new);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ImplClass<?> implClass = (ImplClass<?>) o;
+        return impl.equals(implClass.impl) && constructor.equals(implClass.constructor) && scope == implClass.scope;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(impl, constructor, scope);
     }
 
     public Class<T> getImpl() {
