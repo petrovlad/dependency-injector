@@ -18,7 +18,7 @@ public class InjectorImpl implements Injector {
     // fail fast же
 
     private final BindingsMap bindings;
-    private final Map<Class<?>, Object> singletonCache;
+    private final Map<ImplClass<?>, Object> singletonCache;
 
     public InjectorImpl() {
         bindings = new BindingsMap();
@@ -56,11 +56,15 @@ public class InjectorImpl implements Injector {
     }
 
     private Object instantiateSingleton(ImplClass<?> implClass) {
-        return null;
-    }
+        // чекнуть, есть ли в кеше
+        Object singleton = singletonCache.get(implClass);
+        if (singleton == null) {
+        // если нет - создать и добавить в кеш
+            singleton = instantiatePrototype(implClass);
+            singletonCache.put(implClass, singleton);
+        }
 
-    private <T> T instantiateSingleton() {
-        return null;
+        return singleton;
     }
 
     @Override
