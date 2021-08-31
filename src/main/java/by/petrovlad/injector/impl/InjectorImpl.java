@@ -56,7 +56,7 @@ public class InjectorImpl implements Injector {
         // чекнуть, есть ли в кеше
         Object singleton = singletonCache.get(implClass);
         if (singleton == null) {
-        // если нет - создать и добавить в кеш
+            // если нет - создать и добавить в кеш
             singleton = instantiatePrototype(implClass);
             singletonCache.put(implClass, singleton);
         }
@@ -91,12 +91,16 @@ public class InjectorImpl implements Injector {
 
     @Override
     public <T> void bind(Class<T> intf, Class<? extends T> impl) {
-        bindings.addBinding(intf, impl, Scope.PROTOTYPE);
+        bindByScope(intf, impl, Scope.SINGLETON);
     }
 
     @Override
     public <T> void bindSingleton(Class<T> intf, Class<? extends T> impl) {
-        ImplClass<?> implClass = bindings.addBinding(intf, impl, Scope.SINGLETON);
+        bindByScope(intf, impl, Scope.PROTOTYPE);
+    }
+
+    private <T> void bindByScope(Class<T> intf, Class<? extends T> impl, Scope scope) {
+        ImplClass<?> implClass = bindings.addBinding(intf, impl, scope);
         if (hasCyclicDependencies(implClass)) {
             throw new CyclicInjectionException(implClass.getImpl().getName());
         }
