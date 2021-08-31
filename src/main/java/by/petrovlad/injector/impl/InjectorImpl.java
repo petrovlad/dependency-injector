@@ -2,20 +2,17 @@ package by.petrovlad.injector.impl;
 
 import by.petrovlad.injector.Injector;
 import by.petrovlad.injector.Provider;
+import by.petrovlad.injector.exception.CyclicInjectionException;
 import by.petrovlad.injector.util.BindingsMap;
 import by.petrovlad.injector.util.ImplClass;
 import by.petrovlad.injector.util.Scope;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InjectorImpl implements Injector {
-
-    // если несколько конструкторов, то бросать исключение при регистрации или при создании?
-    // fail fast же
 
     private final BindingsMap bindings;
     private final Map<ImplClass<?>, Object> singletonCache;
@@ -67,6 +64,31 @@ public class InjectorImpl implements Injector {
         return singleton;
     }
 
+    private boolean hasCyclicDependencies(ImplClass<?> implClass) {
+        return hasCyclicDependencies(implClass, new HashSet<>());
+    }
+
+    private boolean hasCyclicDependencies(ImplClass<?> implClass, Set<ImplClass<?>> classTrace) {
+        classTrace.add(implClass);
+
+        Constructor<?> constructor = implClass.getConstructor();
+        boolean has = false;
+        List<ImplClass<?>> dependencies = Arrays
+                .stream(constructor.getParameterTypes())
+                .map(bindings::get)
+                .collect(Collectors.toList());
+
+        for (ImplClass<?> dependency : dependencies) {
+            if (classTrace.contains(dependency)) {
+                has = true;
+                break;
+            }
+            has = hasCyclicDependencies(dependency, classTrace);
+        }
+        classTrace.remove(implClass);
+        return has;
+    }
+
     @Override
     public <T> void bind(Class<T> intf, Class<? extends T> impl) {
         bindings.addBinding(intf, impl, Scope.PROTOTYPE);
@@ -74,6 +96,9 @@ public class InjectorImpl implements Injector {
 
     @Override
     public <T> void bindSingleton(Class<T> intf, Class<? extends T> impl) {
-        bindings.addBinding(intf, impl, Scope.SINGLETON);
+        ImplClass<?> implClass = bindings.addBinding(intf, impl, Scope.SINGLETON);
+        if (hasCyclicDependencies(implClass)) {
+            throw new CyclicInjectionException(implClass.getImpl().getName());
+        }
     }
 }
