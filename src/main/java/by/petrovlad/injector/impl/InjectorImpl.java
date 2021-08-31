@@ -48,7 +48,7 @@ public class InjectorImpl implements Injector {
                 .map(type -> instantiatePrototype(bindings.get(type)))
                 .toArray();
         try {
-            return resultConstructor.newInstance();
+            return resultConstructor.newInstance(args);
         } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
