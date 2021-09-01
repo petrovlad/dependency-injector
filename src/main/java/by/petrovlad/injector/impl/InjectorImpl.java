@@ -2,6 +2,7 @@ package by.petrovlad.injector.impl;
 
 import by.petrovlad.injector.Injector;
 import by.petrovlad.injector.Provider;
+import by.petrovlad.injector.exception.BindingNotFoundException;
 import by.petrovlad.injector.exception.CyclicInjectionException;
 import by.petrovlad.injector.util.BindingsMap;
 import by.petrovlad.injector.util.ImplClass;
@@ -40,12 +41,22 @@ public class InjectorImpl implements Injector {
 
         Constructor<?> resultConstructor = implClass.getConstructor();
 
-        Object[] args = Arrays
+        List<Class<?>> types = Arrays
                 .stream(resultConstructor.getParameterTypes())
-                .map(type -> instantiatePrototype(bindings.get(type)))
-                .toArray();
+                .collect(Collectors.toList());
+
+        List<Object> args = new ArrayList<>();
+
+        for (Class<?> type : types) {
+            // check if all types has registered implementation
+            if (!bindings.containsKey(type)) {
+                throw new BindingNotFoundException(type.getName());
+            }
+            args.add(getProvider(type).getInstance());
+        }
+
         try {
-            return resultConstructor.newInstance(args);
+            return resultConstructor.newInstance(args.toArray());
         } catch (InvocationTargetException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
