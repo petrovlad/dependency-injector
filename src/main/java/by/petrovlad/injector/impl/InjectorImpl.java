@@ -91,12 +91,12 @@ public class InjectorImpl implements Injector {
 
     @Override
     public <T> void bind(Class<T> intf, Class<? extends T> impl) {
-        bindByScope(intf, impl, Scope.SINGLETON);
+        bindByScope(intf, impl, Scope.PROTOTYPE);
     }
 
     @Override
     public <T> void bindSingleton(Class<T> intf, Class<? extends T> impl) {
-        bindByScope(intf, impl, Scope.PROTOTYPE);
+        bindByScope(intf, impl, Scope.SINGLETON);
     }
 
     private <T> void bindByScope(Class<T> intf, Class<? extends T> impl, Scope scope) {
