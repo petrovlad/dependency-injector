@@ -22,6 +22,10 @@ public class BindingsMap {
         this.bindings = bindings;
     }
 
+    public <T> ImplClass<?> addBinding(Class<T> intf, ImplClass<?> impl) {
+        return bindings.put(intf, impl);
+    }
+
     public <T> ImplClass<?> addBinding(Class<T> intf, Class<? extends T> impl, Scope scope) {
         return bindings.put(intf, new ImplClass<>(impl, scope));
     }

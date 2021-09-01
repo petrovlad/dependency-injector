@@ -100,7 +100,8 @@ public class InjectorImpl implements Injector {
     }
 
     private <T> void bindByScope(Class<T> intf, Class<? extends T> impl, Scope scope) {
-        ImplClass<?> implClass = bindings.addBinding(intf, impl, scope);
+        ImplClass<?> implClass = new ImplClass<>(impl, scope);
+        bindings.addBinding(intf, implClass);
         if (hasCyclicDependencies(implClass)) {
             throw new CyclicInjectionException(implClass.getImpl().getName());
         }
