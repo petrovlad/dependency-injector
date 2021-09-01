@@ -23,10 +23,16 @@ public class BindingsMap {
     }
 
     public <T> ImplClass<?> addBinding(Class<T> intf, ImplClass<?> impl) {
+        if (intf == null || impl == null) {
+            throw new IllegalArgumentException();
+        }
         return bindings.put(intf, impl);
     }
 
     public <T> ImplClass<?> addBinding(Class<T> intf, Class<? extends T> impl, Scope scope) {
+        if (intf == null || impl == null || scope == null) {
+            throw new IllegalArgumentException();
+        }
         return bindings.put(intf, new ImplClass<>(impl, scope));
     }
 

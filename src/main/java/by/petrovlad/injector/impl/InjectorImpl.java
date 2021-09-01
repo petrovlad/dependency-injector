@@ -25,6 +25,9 @@ public class InjectorImpl implements Injector {
 
     @Override
     public <T> Provider<T> getProvider(Class<T> type) {
+        if (type == null) {
+            throw new IllegalArgumentException();
+        }
         ImplClass<?> implClass = bindings.get(type);
 
         if (implClass == null) {
@@ -118,6 +121,9 @@ public class InjectorImpl implements Injector {
     }
 
     private <T> void bindByScope(Class<T> intf, Class<? extends T> impl, Scope scope) {
+        if (intf == null || impl == null || scope == null) {
+            throw new IllegalArgumentException();
+        }
         ImplClass<?> implClass = new ImplClass<>(impl, scope);
         bindings.addBinding(intf, implClass);
     }
