@@ -20,7 +20,7 @@ public class InjectorImpl implements Injector {
 
     public InjectorImpl() {
         bindings = new BindingsMap();
-        singletonCache = new HashMap<>();
+        singletonCache = new Hashtable<>();
     }
 
     @Override
@@ -28,26 +28,29 @@ public class InjectorImpl implements Injector {
         if (type == null) {
             throw new IllegalArgumentException();
         }
+
         ImplClass<?> implClass = bindings.get(type);
 
         if (implClass == null) {
             return null;
         }
 
-        // this logic should be here.
-        // because first we need to register candidates (aka BeanDefinitions)
-        // and then to check whether registered candidates has cyclic dependencies
-        if (hasCyclicDependencies(implClass)) {
-            throw new CyclicInjectionException(implClass.getImpl().getName());
-        }
+        synchronized (bindings) {
+            // this logic should be here.
+            // because first we need to register candidates (aka BeanDefinitions)
+            // and then to check whether registered candidates has cyclic dependencies
+            if (hasCyclicDependencies(implClass)) {
+                throw new CyclicInjectionException(implClass.getImpl().getName());
+            }
 
-        return switch (bindings.get(type).getScope()) {
-            case PROTOTYPE -> () -> (T) instantiatePrototype(implClass);
-            case SINGLETON-> () -> (T) instantiateSingleton(implClass);
-        };
+            return switch (bindings.get(type).getScope()) {
+                case PROTOTYPE -> () -> (T) instantiatePrototype(implClass);
+                case SINGLETON -> () -> (T) instantiateSingleton(implClass);
+            };
+        }
     }
 
-    private Object instantiatePrototype(ImplClass<?> implClass) {
+    private synchronized Object instantiatePrototype(ImplClass<?> implClass) {
 
         Constructor<?> resultConstructor = implClass.getConstructor();
 
@@ -74,10 +77,10 @@ public class InjectorImpl implements Injector {
     }
 
     private Object instantiateSingleton(ImplClass<?> implClass) {
-        // чекнуть, есть ли в кеше
+        // first check if it exists in cache
         Object singleton = singletonCache.get(implClass);
         if (singleton == null) {
-            // если нет - создать и добавить в кеш
+            // if doesn't - instantiate as a prototype + add to cache
             singleton = instantiatePrototype(implClass);
             singletonCache.put(implClass, singleton);
         }

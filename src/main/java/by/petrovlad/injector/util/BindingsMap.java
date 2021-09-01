@@ -1,21 +1,23 @@
 package by.petrovlad.injector.util;
 
 import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 
 public class BindingsMap {
     // key - intf, value - pair impl+scope
-    private HashMap<Class<?>, ImplClass<?>> bindings;
+    private Map<Class<?>, ImplClass<?>> bindings;
 
-    public void setBindings(HashMap<Class<?>, ImplClass<?>> bindings) {
+    public void setBindings(Map<Class<?>, ImplClass<?>> bindings) {
         this.bindings = bindings;
     }
 
-    public HashMap<Class<?>, ImplClass<?>> getBindings() {
+    public Map<Class<?>, ImplClass<?>> getBindings() {
         return bindings;
     }
 
     public BindingsMap() {
-        this.bindings = new HashMap<>();
+        this.bindings = new Hashtable<>();
     }
 
     public BindingsMap(HashMap<Class<?>, ImplClass<?>> bindings) {
