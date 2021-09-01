@@ -31,6 +31,13 @@ public class InjectorImpl implements Injector {
             return null;
         }
 
+        // this logic should be here.
+        // because first we need to register candidates (aka BeanDefinitions)
+        // and then to check whether registered candidates has cyclic dependencies
+        if (hasCyclicDependencies(implClass)) {
+            throw new CyclicInjectionException(implClass.getImpl().getName());
+        }
+
         return switch (bindings.get(type).getScope()) {
             case PROTOTYPE -> () -> (T) instantiatePrototype(implClass);
             case SINGLETON-> () -> (T) instantiateSingleton(implClass);
@@ -113,8 +120,5 @@ public class InjectorImpl implements Injector {
     private <T> void bindByScope(Class<T> intf, Class<? extends T> impl, Scope scope) {
         ImplClass<?> implClass = new ImplClass<>(impl, scope);
         bindings.addBinding(intf, implClass);
-        if (hasCyclicDependencies(implClass)) {
-            throw new CyclicInjectionException(implClass.getImpl().getName());
-        }
     }
 }
